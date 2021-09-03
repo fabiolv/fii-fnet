@@ -1,0 +1,5 @@
+requests
+flask
+bs4
+python-dotenv
+kora
