@@ -83,7 +83,7 @@ def get_fnet_doc_content(id:str) -> str:
 
 @fii_fnet_dividend.route("/dividend")
 def get_dividend_report_root():
-    return "Usage /dividends/<CNPJ>?period=MMYYYY"
+    return "Usage /dividends/CNPJ?period=MMYYYY"
 
 @fii_fnet_dividend.route("/dividend/<cnpj>")
 def get_dividend_report(cnpj: str) -> Response:

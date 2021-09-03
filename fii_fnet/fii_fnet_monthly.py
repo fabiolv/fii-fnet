@@ -77,7 +77,7 @@ def get_fnet_doc_content(id:str) -> str:
 
 @fii_fnet_monthly.route("/monthlyreport")
 def get_monthly_report_root():
-    return "Usage /monthlyreport/<CNPJ>?period=MMYYYY"
+    return "Usage /monthlyreport/CNPJ?period=MMYYYY"
 
 @fii_fnet_monthly.route("/monthlyreport/<cnpj>")
 def get_monthly_report(cnpj: str) -> Response:
