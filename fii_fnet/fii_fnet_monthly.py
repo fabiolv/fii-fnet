@@ -75,11 +75,11 @@ def get_fnet_doc_content(id:str) -> str:
 
     return html
 
-@fii_fnet_monthly.route("/monthlyreport")
+@fii_fnet_monthly.route("/monthlyreports")
 def get_monthly_report_root():
-    return "Usage /monthlyreport/CNPJ?period=MMYYYY"
+    return "Usage /monthlyreports/CNPJ?period=MMYYYY"
 
-@fii_fnet_monthly.route("/monthlyreport/<cnpj>")
+@fii_fnet_monthly.route("/monthlyreports/<cnpj>")
 def get_monthly_report(cnpj: str) -> Response:
     """
     Receives the CNPJ of a fund and the URL query parameter period=MMYYY

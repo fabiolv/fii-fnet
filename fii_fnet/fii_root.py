@@ -7,6 +7,6 @@ fii_root = Blueprint('fii_root', __name__)
 def root():
     print('Request for /')
     return jsonify({'endpoints': [
-        '/dividend',
-        '/monthlyreport'
+        '/dividends',
+        '/monthlyreports'
     ]})

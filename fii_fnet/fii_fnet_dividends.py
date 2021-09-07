@@ -81,11 +81,11 @@ def get_fnet_doc_content(id:str) -> str:
 
     return html
 
-@fii_fnet_dividend.route("/dividend")
+@fii_fnet_dividend.route("/dividends")
 def get_dividend_report_root():
-    return "Usage /dividends/CNPJ?period=MMYYYY"
+    return "Usage /dividendss/CNPJ?period=MMYYYY"
 
-@fii_fnet_dividend.route("/dividend/<cnpj>")
+@fii_fnet_dividend.route("/dividends/<cnpj>")
 def get_dividend_report(cnpj: str) -> Response:
     """
     Receives the CNPJ of a fund and the URL query parameter period=MMYYY
