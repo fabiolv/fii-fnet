@@ -1,5 +1,5 @@
 requests
 flask
-bs4
 python-dotenv
+# bs4
 # kora

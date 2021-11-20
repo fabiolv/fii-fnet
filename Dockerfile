@@ -1,6 +1,7 @@
-FROM joyzoursky/python-chromedriver:3.9-alpine
+# FROM joyzoursky/python-chromedriver:3.9-alpine
 #https://stackoverflow.com/questions/47955548/docker-image-with-python3-chromedriver-chrome-selenium
-#RUN apk add --no-cache bash nano
+FROM python:3.9-alpine3.14
+RUN apk add --no-cache bash nano
 
 WORKDIR /app
 
