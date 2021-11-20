@@ -1,12 +1,13 @@
-import unicodedata
-from datetime import date, datetime
+# import unicodedata
+# from kora.selenium import wd
+# from bs4 import BeautifulSoup
+from datetime import datetime
 from calendar import monthrange
 from flask.wrappers import Response
 from urllib.parse import urlencode, quote_plus
-from kora.selenium import wd
 from flask import Blueprint, jsonify, request
-from bs4 import BeautifulSoup
-import json
+import html
+import requests
 
 # Get the list of documents from FNET
 # Return the HTML in a JSON
@@ -40,46 +41,44 @@ def search_fnet_dividends_report(cnpj:str, period:str) -> dict:
 
     # Base URL
     # example https://fnet.bmfbovespa.com.br/fnet/publico/pesquisarGerenciadorDocumentosDados?d=22&s=0&l=10&o%5B0%5D%5BdataEntrega%5D=desc&tipoFundo=1&idCategoriaDocumento=6&idTipoDocumento=40&idEspecieDocumento=0&situacao=A&cnpj=37087810000137&dataReferencia=06%2F2021&_=1628987139815
-    base_url = (F"https://fnet.bmfbovespa.com.br/fnet/publico/pesquisarGerenciadorDocumentosDados?d=22"
-        F"&s=0&l=24"
-        F"&tipoFundo={type}"
-        F"&idCategoriaDocumento={category}"
-        F"&idTipoDocumento={doc_type}"
-        F"&idEspecieDocumento={doc_subtype}"
-        F"&situacao={status}"
-        F"&cnpj={cnpj}"
-        F"&{period_encoded}")
-
-    wd.get(base_url)
-
-    data = wd.page_source
+    base_url = (f'http://fnet.bmfbovespa.com.br/fnet/publico/pesquisarGerenciadorDocumentosDados?d=22'
+        f'&s=0&l=24'
+        f'&tipoFundo={type}'
+        f'&idCategoriaDocumento={category}'
+        f'&idTipoDocumento={doc_type}'
+        f'&idEspecieDocumento={doc_subtype}'
+        f'&situacao={status}'
+        f'&cnpj={cnpj}'
+        f'&{period_encoded}')
     print(base_url)
+
+    # wd.get(base_url)
+    # data = wd.page_source
+
+    resp = requests.get(base_url)
+    data = resp.json()
     # print(data)  
-
-    return data
-
-def parse_html(html: str) -> dict:
-    """Using BeautifulSoup, parses the HTML returned from Kora and creates a dict"""
-    soup = BeautifulSoup(html, 'html.parser')
-
-    print('parse html...')
-
-    data = json.loads(soup.text)
-    # print(data)
 
     return data
 
 def get_fnet_doc_content(id:str) -> str:
     """Searches for the doc in FNET using the id and return the page HTML"""
 
-    url = F'http://fnet.bmfbovespa.com.br/fnet/publico/exibirDocumento?id={id}&cvm=true'
+    url = f'http://fnet.bmfbovespa.com.br/fnet/publico/exibirDocumento?id={id}&cvm=true'
 
-    wd.get(url)
+    headers = {
+        'Accept': 'text/html',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+    }
+    # wd.get(url)
+    # html = wd.page_source
 
-    html = wd.page_source
-    html = unicodedata.normalize('NFKD', html).encode('ASCII', 'ignore').decode('UTF-8')
+    resp = requests.get(url, headers=headers)
+    # html = unicodedata.normalize('NFKD', html).encode('ASCII', 'ignore').decode('UTF-8')
 
-    return html
+    # Using html unescape instead of the normalize function to replace the special chars in the page
+    html_text = html.unescape(resp.text)
+    return html_text
 
 @fii_fnet_dividend.route("/dividends")
 def get_dividend_report_root():
@@ -105,28 +104,22 @@ def get_dividend_report(cnpj: str) -> Response:
             'error': True,
             'data': [],
         }
-
         resp = jsonify(out)
         resp.status_code = 400
-
         return resp
 
-    html_docs = search_fnet_dividends_report(cnpj, period)
-
-    docs = parse_html(html_docs)
+    docs = search_fnet_dividends_report(cnpj, period)
 
     if docs["recordsTotal"] == 0:
         out = {
             'status_code': 404,
-            'msg': F'Could not find any monthly report for {period}',
+            'msg': f'Could not find any monthly report for {cnpj} on {period}',
             'error': True,
             'recordsTotal': docs['recordsTotal'],
             'data': [],
         }
-
         resp = jsonify(out)
         resp.status_code = 404
-
         return resp
 
     # docs_content is a list of jsons with the ID and the html content of each document found
